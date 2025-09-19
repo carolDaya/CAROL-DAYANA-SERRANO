@@ -1,0 +1,43 @@
+Problema: Registro de viajes en un sistema de transporte
+
+Una empresa de transporte quiere crear un sistema básico para registrar el uso de su servicio.
+Cuando una persona compra un pasaje, el sistema debe:
+
+1. Verificar la edad del pasajero
+   - Si es menor de 5 años, el pasaje es gratis.
+   - Si es entre 5 y 60 años, paga el pasaje normal.
+   - Si es mayor de 60 años, recibe un descuento especial.
+
+2. Calcular el costo total del viaje en la semana, dependiendo de los días que viaje.
+   - Cada pasaje cuesta \$5,000(antes de descuentos).
+
+3. Permitir escoger el tipo de servicio usando un (switch):
+   - ECONÓMICO → viaje en bus normal.
+   - EXPRESS → viaje más rápido, cuesta un 20% más.
+   - LUJO → viaje con comodidades, cuesta el doble.
+
+4. Mostrar un resumen final al cliente, incluyendo:
+   - Mensaje sobre su tipo de tarifa (gratis, normal, descuento).
+   - Número de días de viaje en la semana.
+   - Costo total calculado.
+   - Tipo de servicio elegido. 
+
+
+ENTRADAS(INPUT)
+-edad
+-dias del viaje
+-tipo de servicio
+
+SALIDAS(OUTPUT)
+-Mensaje sobre su tipo de tarifa (gratis, normal, descuento).
+- Número de días de viaje en la semana.
+- Costo total calculado.
+- Tipo de servicio elegido. 
+
+REGLAS
+-Condicional: 
+If/else verificar edad y aplicar tarifa.
+-Bucle: 
+(for) sumar costo por cada día de la semana.
+-Seleccion Multiple:
+Switch determinar el tipo de servicio y su costo.
