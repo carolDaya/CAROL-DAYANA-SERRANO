@@ -49,17 +49,16 @@ export class BranchOfficeController {
     const branch = this.ensureBranchExists(branchId);
     if (!branch) return { message: `Branch with ID ${branchId} not found.`, data: null };
 
-    //Avoid duplicate trackIds
     const exists = branch.receivedShipments.some(s => s.trackingId === shipmentInfo.trackingId);
     if (exists) return { message: `Shipment with tracking ID ${shipmentInfo.trackingId} already exists.`, data: null };
 
     branch.receivedShipments.push(shipmentInfo);
-
     return {
-      message: `Shipment with tracking ID ${shipmentInfo.trackingId} successfully registered in branch ${branchId}.`,
-      data: branch.receivedShipments,
+      message: 'Shipment successfully registered.',
+      data: shipmentInfo,
     };
   }
+
 
   // Get details of a specific branch
   @Get(':branchId')

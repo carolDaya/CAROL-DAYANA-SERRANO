@@ -2,48 +2,63 @@ import { Controller, Get, Post, Delete, Body, Param, Query, ParseIntPipe } from 
 import { ShipmentDto } from './dto/shipment.dto';
 import { ShipmentStatus } from './enums/shipment-status';
 import { ShipmentWithId } from './interface/ShipmentWithId';
+import { TrackingInfo } from './shipment.types';
 
 @Controller('shipments')
 export class ShipmentController {
+  //In-memory storage for shipments.
   private shipments: ShipmentWithId[] = [];
   private nextId = 1;
 
-  // Helper to find shipment by ID
-  private findShipmentById(id: number) {
+  //Helper method to find a shipment by its ID
+  private findShipmentIndexAndData(id: number) {
     const index = this.shipments.findIndex(shipment => shipment.id === id);
     return { index, shipment: index >= 0 ? this.shipments[index] : null };
   }
 
-  // Helper to get shipment or return error
-  private getShipment(id: number) {
-    const { shipment } = this.findShipmentById(id);
+  //Helper method to get a shipment or return a standardized error response
+  private getShipmentOrError(id: number) {
+    const { shipment } = this.findShipmentIndexAndData(id);
     return shipment
       ? { shipment }
       : { shipment: null, error: { message: `Shipment with ID ${id} not found.`, data: null } };
   }
 
+  // Creates and registers a new shipment
   @Post('create')
-  create(@Body() shipmentDto: ShipmentDto) {
+  createShipment(@Body() shipmentDto: ShipmentDto) {
     const newShipment: ShipmentWithId = { id: this.nextId++, ...shipmentDto, events: [] };
     this.shipments.push(newShipment);
-    return { message: 'Shipment successfully created.', data: newShipment };
+    return { 
+      message: 'Shipment successfully created.', 
+      data: newShipment 
+    };
   }
 
-  @Post(':id/status')
-  updateStatus(@Param('id', ParseIntPipe) id: number, @Body() body: { status: ShipmentStatus }) {
-    const { shipment, error } = this.getShipment(id);
+  // adds a new event to a shipment 
+  @Post(':id/events')
+  addEventToShipment(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() body: { status: ShipmentStatus }
+  ) {
+    const { shipment, error } = this.getShipmentOrError(id);
     if (!shipment) return error;
 
-    shipment.status = body.status;
-    return { message: `Status of shipment ${id} updated successfully.`, data: shipment };
+    const newEvent = { id: Date.now(), description: `Status changed to ${body.status}` };
+    shipment.status = body.status;  
+    shipment.events.push(newEvent);
+
+    return {
+      message: `New event added to shipment ${id}.`,
+      data: shipment,
+    };
   }
 
+  // Retrieves tracking information for a specific shipment.
   @Get(':id/tracking')
-  getTracking(@Param('id', ParseIntPipe) id: number) {
-    const { shipment, error } = this.getShipment(id);
+  getShipmentTracking(@Param('id', ParseIntPipe) id: number) {
+    const { shipment, error } = this.getShipmentOrError(id);
     if (!shipment) return error;
-
-    type TrackingInfo = Pick<ShipmentWithId, 'id' | 'trackingId' | 'status' | 'currentBranchId'>;
 
     const trackingData: TrackingInfo = {
       id: shipment.id,
@@ -53,42 +68,56 @@ export class ShipmentController {
     };
 
     return {
-      message: 'Tracking information obtained.',
+      message: 'Tracking information retrieved successfully.',
       data: trackingData,
     };
   }
 
+  // Lists all shipments with optional filters for limit and status.
   @Get()
-  findAll(@Query('limit') limit?: string, @Query('status') status?: ShipmentStatus) {
+  getAllShipments(
+    @Query('limit', ParseIntPipe) limit?: number,
+    @Query('status') status?: ShipmentStatus
+  ) {
     let data = this.shipments;
+
     if (status) data = data.filter(s => s.status === status);
-    if (limit) {
-      const parsedLimit = parseInt(limit);
-      if (!isNaN(parsedLimit)) data = data.slice(0, parsedLimit);
-    }
-    return { message: 'List of shipments obtained.', data, total: data.length };
+    if (limit) data = data.slice(0, limit);
+
+    return { message: 'List of shipments retrieved successfully.', data };
   }
 
+  //Cancels (deletes) a shipment by its ID.
   @Delete(':id')
-  cancel(@Param('id', ParseIntPipe) id: number) {
-    const { shipment, error } = this.getShipment(id);
+  cancelShipment(@Param('id', ParseIntPipe) id: number) {
+    const { shipment, error } = this.getShipmentOrError(id);
     if (!shipment) return error;
 
-    const { index } = this.findShipmentById(id);
+    const { index } = this.findShipmentIndexAndData(id);
     const deleted = this.shipments.splice(index, 1);
     return { message: `Shipment ${id} cancelled successfully.`, data: deleted[0] };
   }
 
+  //Deletes a specific event from a shipment.
   @Delete(':id/events/:eventId')
-  deleteEvent(@Param('id', ParseIntPipe) id: number, @Param('eventId', ParseIntPipe) eventId: number) {
-    const { shipment, error } = this.getShipment(id);
+  deleteShipmentEvent(
+    @Param('id', ParseIntPipe) id: number, 
+    @Param('eventId', ParseIntPipe) eventId: number
+  ) {
+    const { shipment, error } = this.getShipmentOrError(id);
     if (!shipment) return error;
 
     const events = shipment.events ?? [];
     const eventIndex = events.findIndex(e => e.id === eventId);
-    if (eventIndex === -1) return { message: `Event ${eventId} not found in shipment ${id}.`, data: null };
+    if (eventIndex === -1) {
+      return { message: `Event ${eventId} not found in shipment ${id}.`, data: null };
+    }
 
     const deletedEvent = events.splice(eventIndex, 1)[0];
-    return { message: `Event ${eventId} from shipment ${id} deleted successfully.`, data: deletedEvent };
+    return { 
+      message: `Event ${eventId} from shipment ${id} deleted successfully.`, 
+      data: deletedEvent 
+    };
   }
+  
 }

@@ -26,11 +26,7 @@ export class ShipmentDto {
   @IsNumber()
   @IsPositive()
   packageWeight: number;
-
-  @IsString()
-  @IsOptional()
-  packageDimensions?: string;
-
+  
   @IsString()
   @IsOptional()
   description?: string;

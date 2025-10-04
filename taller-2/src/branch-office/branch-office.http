@@ -10,10 +10,7 @@ Content-Type: application/json
   "functionType": "DISTRIBUTION_CENTER",
   "isActive": false
 }
-
-
 #1.1 POST - Register Branch Office (Error Case: Validation) 
-#Fails because 'phoneNumber' is missing and 'name' is empty (DTO validation errors).
 
 POST http://localhost:3000/branches/register
 Content-Type: application/json
@@ -26,18 +23,18 @@ Content-Type: application/json
   "isActive": false
 }
 
+#-----------------------------------------------------------------
+
 # 2 POST - Register Shipment (Success) Registers a received shipment for the branch with ID 1.
 POST http://localhost:3000/branches/1/receive-shipment
 Content-Type: application/json
 
 {
-  "trackingId": "TRK12345",
+  "trackingId": "TRK1234",
   "status": "RECEIVED",
-  "receivedAt": "2025-10-03T21:00:00.000Z"
+  "receivedAt": "2025-10-03"
 }
-
 # 2.1 POST - Register Shipment (Error Case: Branch Not Found)
-# Fails because Branch ID 999 doesn't exist in the mock data store.
 POST http://localhost:3000/branches/999/receive-shipment
 Content-Type: application/json
 
@@ -46,16 +43,21 @@ Content-Type: application/json
   "status": "RECEIVED"
 }
 
-# 3. GET - Get Branch Details (Success) Fetches and returns information for the branch with ID 1.
+#-----------------------------------------------------------------
+
+# 3. GET - Get Branch Details (Success) Fetches details of the branch with ID 1.
 GET http://localhost:3000/branches/1
+# 3.1  GET - Get Branch Details (Error Case: Branch Not Found) Fails because Branch ID 999 doesn't exist.
+GET http://localhost:3000/branches/2
 
-# 3.1  GET - Get Branch Details (Error Case: Branch Not Found)
-# Fails because Branch ID 999 doesn't exist.
-GET http://localhost:3000/branches/999
-
+#-----------------------------------------------------------------
 
 #4. GET - List All Branches
 GET http://localhost:3000/branches
 
+#-----------------------------------------------------------------
+
 # 5. GET - List Branches with Limit
 GET http://localhost:3000/branches?limit=2
+
+#-----------------------------------------------------------------
