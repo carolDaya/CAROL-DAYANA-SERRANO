@@ -1,0 +1,55 @@
+#1. POST - Create Shipment (Success)
+POST http://localhost:3000/shipments/create
+Content-Type: application/json
+
+{
+  "trackingId": "trk-123",
+  "clientId": 1,
+  "senderName": "Alice",
+  "recipientAddress": "123 Main St",
+  "recipientCity": "Bogotá",
+  "packageWeight": 2.5,
+  "status": "RECEIVED",
+  "currentBranchId": 5
+}
+
+
+#2. POST - Update Status (Success)
+POST http://localhost:3000/shipments/1/status
+Content-Type: application/json
+
+{
+  "status": "RECEIVED"
+}
+
+#2b. POST - Update Status (Error: Shipment Not Found)
+POST http://localhost:3000/shipments/999/status
+Content-Type: application/json
+
+{
+  "status": "DELIVERED"
+}
+
+### 3. GET - Get Tracking Info (Success)
+GET http://localhost:3000/shipments/1/tracking
+
+# 3b. GET - Get Tracking Info (Error: Shipment Not Found)
+GET http://localhost:3000/shipments/998/tracking
+
+#4a. GET - Find All (Success)
+GET http://localhost:3000/shipments
+
+# 4b. GET - Find All with Limit and Status Filter
+GET http://localhost:3000/shipments?limit=5&status=IN_TRANSIT
+
+#5. DELETE - Cancel Shipment (Success)
+DELETE http://localhost:3000/shipments/1
+
+#5b. DELETE - Cancel Shipment (Error: Shipment Not Found)
+DELETE http://localhost:3000/shipments/1
+
+#6. DELETE - Delete Event (Error: Event Not Found)
+DELETE http://localhost:3000/shipments/2/events/5
+
+#6b. DELETE - Delete Event (Error: Shipment Not Found)
+DELETE http://localhost:3000/shipments/997/events/1
