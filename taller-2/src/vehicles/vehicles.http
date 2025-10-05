@@ -1,0 +1,55 @@
+# 1. POST-register a new vehicle
+POST http://localhost:3000/vehicles/register
+Content-Type: application/json
+
+{
+  "plateNumber": "ABC-789",
+  "type": "Van",
+  "capacityKg": 2000,
+  "currentBranchId": 3,
+  "status": "AVAILABLE"
+}
+#2. POST-register a maintenance record for vehicle with id 1
+POST http://localhost:3000/vehicles/1/maintenance
+Content-Type: application/json
+
+{
+  "description": "Oil and filter change",
+  "date": "2025-10-04",
+  "cost": 150
+}
+
+#-------------------------------------------------------------
+
+# 3. PUT - Replace all vehicle information
+PUT http://localhost:3000/vehicles/1
+Content-Type: application/json
+
+
+{
+  "plateNumber": "XYZ789",
+  "type": "Van",
+  "capacityKg": 3000,
+  "currentBranchId": 4,
+  "status": "MAINTENANCE"
+}
+
+#-------------------------------------------------------------
+# 4. PUT - Replace entire maintenance history
+PUT http://localhost:3000/vehicles/1/maintenance
+Content-Type: application/json
+
+{
+  "maintenanceHistory": [
+    {
+      "description": "Full engine service",
+      "date": "2025-02-12",
+      "cost": 450
+    },
+    {
+      "description": "Brake pad replacement",
+      "date": "2025-04-10",
+      "cost": 180
+    }
+  ]
+}

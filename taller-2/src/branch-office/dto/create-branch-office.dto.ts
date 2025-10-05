@@ -1,5 +1,5 @@
 import { IsString, IsBoolean, IsEnum, IsNotEmpty, Length, Matches } from "class-validator";
-import { FunctionType } from "../enums/FunctionType";
+import { FunctionType } from "../enums/function-type";
 import { Cities } from "../enums/cities";
 
 export class CreateBranchOfficeDto {

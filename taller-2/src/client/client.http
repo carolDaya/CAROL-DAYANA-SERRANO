@@ -1,0 +1,35 @@
+#0. HTTP Requests for Client Management
+# POST - Create a new client
+POST http://localhost:3000/clients/register
+Content-Type: application/json
+
+{
+  "name": "María",
+  "lastName": "López",
+  "email": "maria.lopez@example.com",
+  "phoneNumber": "+573001234567",
+  "address": "Calle 123, Bogotá"
+}
+
+
+#1. GET-All clients
+GET http://localhost:3000/clients
+GET http://localhost:3000/clients?limit=5&active=true
+
+#--------------------------------------------------------
+
+#2. GET-Client details by ID
+GET http://localhost:3000/clients/1
+
+#--------------------------------------------------------
+
+#3. PATCH-Deactivate a client by ID
+PATCH http://localhost:3000/clients/1/deactivate
+#4. PATCH-Edit client information by ID
+PATCH http://localhost:3000/clients/1
+Content-Type: application/json
+
+{
+  "name": "María López",
+  "email": "maria.lopez@example.com"
+}

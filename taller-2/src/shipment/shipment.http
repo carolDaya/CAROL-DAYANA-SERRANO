@@ -1,4 +1,4 @@
-#1. POST - Create Shipment (Success)
+#1. POST-Create Shipment (Success)
 POST http://localhost:3000/shipments/create
 Content-Type: application/json
 
@@ -15,15 +15,15 @@ Content-Type: application/json
 
 #------------------------------------------------------------------------
 
-#2. POST - Update Status (Success)
+#2. POST-Update Status (Success)
 POST http://localhost:3000/shipments/1/events
 Content-Type: application/json
 
 {
   "status": "RECEIVED"
 }
-#2.1 POST - Update Status (Error: Shipment Not Found)
-POST http://localhost:3000/shipments/999/events
+#2.1 POST-Update Status (Error: Shipment Not Found)
+POST http://localhost:3000/shipments/34/events
 Content-Type: application/json
 
 {
@@ -32,30 +32,31 @@ Content-Type: application/json
 
 #------------------------------------------------------------------------
 
-#3. GET - Get Tracking Info (Success)
+#3. GET-Get Tracking Info (Success)
 GET http://localhost:3000/shipments/1/tracking
-#3.1 GET - Get Tracking Info (Error: Shipment Not Found)
-GET http://localhost:3000/shipments/998/tracking
+#3.1 GET-Get Tracking Info (Error: Shipment Not Found)
+GET http://localhost:3000/shipments/34/tracking
 
 #------------------------------------------------------------------------
 
-#4. GET - Find All (Success)
+#4. GET-Find All (Success)
 GET http://localhost:3000/shipments
-#4.1 GET - Find All with Limit and Status Filter
+
+#4.1 GET-Find All with Limit and Status Filter
 GET http://localhost:3000/shipments?limit=5&status=IN_TRANSIT
 
 #------------------------------------------------------------------------
 
-#5. DELETE - Cancel Shipment (Success)
+#5. DELETE-Cancel Shipment (Success)
 DELETE http://localhost:3000/shipments/1
-#5.1 DELETE - Cancel Shipment (Error: Shipment Not Found)
+#5.1 DELETE-Cancel Shipment (Error: Shipment Not Found)
 DELETE http://localhost:3000/shipments/1
 
 #------------------------------------------------------------------------
 
-#6. DELETE - Delete Event (Success)
-DELETE http://localhost:3000/shipments/2/events/1
-#6.1 DELETE - Delete Event (Error: Event Not Found)
+#6. DELETE-Delete Event (Success)
+DELETE http://localhost:3000/shipments/1/events/1
+#6.1 DELETE-Delete Event (Error: Event Not Found)
 DELETE http://localhost:3000/shipments/2/events/5
 
 #-------------------------------------------------------------------------

@@ -1,11 +1,10 @@
 import { Controller, Post, Body, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { CreateBranchOfficeDto } from './dto/create-branch-office.dto';
-import { ReceivedShipmentDto } from './dto/received-shipment.dto';
-import { FindBranchResult } from './interface/FindBranchResult';
+import { ReceivedShipmentDto } from '../shipment/dto/received-shipment.dto';
+import { FindBranchResult } from './interface/find-branch.result';
 
 @Controller('branches')
 export class BranchOfficeController {
-
   // Mock data store for branches (used instead of a real database)
   private branchList: (CreateBranchOfficeDto & { id: number; receivedShipments: ReceivedShipmentDto[] })[] = [];
   private nextId = 1; // Auto-increment ID for new branches

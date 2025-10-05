@@ -1,5 +1,5 @@
 import { CreateBranchOfficeDto } from '../dto/create-branch-office.dto';
-import { ReceivedShipmentDto } from '../dto/received-shipment.dto';
+import { ReceivedShipmentDto } from '../../shipment/dto/received-shipment.dto';
 
 export interface FindBranchResult {
   found: boolean;
