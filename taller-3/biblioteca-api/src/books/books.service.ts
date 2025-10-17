@@ -1,72 +1,75 @@
-import { Injectable, NotFoundException } from '@nestjs/common'; // Importación de decoradores y excepciones de NestJS
-import { InjectRepository } from '@nestjs/typeorm'; // Importación del decorador para inyectar repositorios
-import { Repository, In } from 'typeorm'; // Importación de Repository y función In para consultas
-import { Book } from './book.entity'; // Importación de la entidad Book
-import { Category } from '../categories/category.entity'; // Importación de la entidad Category
-import { Author } from '../authors/author.entity'; // Importación de la entidad Author
-import { CreateBookDto } from './create-book.dto'; // Importación del DTO para crear libros
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
+import { Book } from './book.entity';
+import { Category } from '../categories/category.entity';
+import { Author } from '../authors/author.entity';
+import { CreateBookDto } from './dto/create-book.dto';
 
-@Injectable() // Decorador que marca como servicio inyectable
-export class BooksService { // Declaración de la clase BooksService
-  constructor( // Declaración del constructor con múltiples repositorios
-    @InjectRepository(Book) // Decorador para inyectar repositorio de libros
-    private readonly booksRepo: Repository<Book>, // Inyección del repositorio de libros como readonly
-
-    @InjectRepository(Category) // Decorador para inyectar repositorio de categorías
-    private readonly catRepo: Repository<Category>, // Inyección del repositorio de categorías como readonly
-
-    @InjectRepository(Author) // Decorador para inyectar repositorio de autores
-    private readonly authorRepo: Repository<Author>, // Inyección del repositorio de autores como readonly
+@Injectable()
+export class BooksService {
+  constructor(
+    @InjectRepository(Book) 
+    private readonly booksRepo: Repository<Book>,
+    @InjectRepository(Category) 
+    private readonly catRepo: Repository<Category>,
+    @InjectRepository(Author) 
+    private readonly authorRepo: Repository<Author>,
   ) {}
 
-  async create(dto: CreateBookDto): Promise<Book> { // Declaración del método para crear libro con tipo de retorno
-    const book = this.booksRepo.create({ // Creación de instancia de libro
-      title: dto.title, // Asignación del título
-      isbn: dto.isbn, // Asignación del ISBN
-      copiesAvailable: dto.copiesAvailable ?? 0, // Asignación de copias disponibles con valor por defecto 0
-      description: dto.description, // Asignación de la descripción
+  async create(dto: CreateBookDto): Promise<Book> {
+    const book = this.booksRepo.create({
+      title: dto.title,
+      isbn: dto.isbn,
+      // Use 0 as default if copiesAvailable is undefined or null
+      copiesAvailable: dto.copiesAvailable ?? 0, 
+      description: dto.description,
     });
 
-    // Categoría
-    if (dto.categoryId) { // Validación de existencia de categoryId
-      const category = await this.catRepo.findOne({ where: { id: dto.categoryId } }); // Consulta para buscar categoría por ID
-      if (!category) throw new NotFoundException('Category not found'); // Validación de que la categoría existe
-      book.category = category; // Asignación de categoría al libro
+    // Handle Category Relationship
+    if (dto.categoryId) {
+      const category = await this.catRepo.findOne({ where: { id: dto.categoryId } });
+      if (!category) throw new NotFoundException('Category not found');
+      book.category = category;
     }
 
-    // Autores
-    if (dto.authorIds && dto.authorIds.length) { // Validación de existencia de autores
-      const authors = await this.authorRepo.findBy({ id: In(dto.authorIds) }); // Consulta para buscar autores usando findBy con In
-      if (!authors.length) throw new NotFoundException('Authors not found'); // Validación de que se encontraron autores
-      book.authors = authors; // Asignación de autores al libro
+    // Handle Authors Relationship (Many-to-Many)
+    if (dto.authorIds && dto.authorIds.length) {
+      // Use TypeORM 'In' operator to efficiently fetch all authors by ID array
+      const authors = await this.authorRepo.findBy({ id: In(dto.authorIds) });
+      if (!authors.length) throw new NotFoundException('Authors not found');
+      book.authors = authors;
     }
 
-    return this.booksRepo.save(book); // Operación de guardar libro en la base de datos
+    return this.booksRepo.save(book);
   }
 
-  async findAll(): Promise<Book[]> { // Declaración del método para buscar todos los libros con tipo de retorno
-    return this.booksRepo.find({ // Operación de buscar todos los libros
-      relations: ['category', 'authors'], // Inclusión de relaciones con categoría y autores
+  async findAll(): Promise<Book[]> {
+    // Load category and authors with the book for the list view
+    return this.booksRepo.find({ 
+      relations: ['category', 'authors'],
     });
   }
 
-  async findOne(id: string): Promise<Book> { // Declaración del método para buscar un libro por ID con tipo de retorno
-    const book = await this.booksRepo.findOne({ // Consulta para buscar libro por ID
-      where: { id }, // Condición de búsqueda por ID
-      relations: ['category', 'authors'], // Inclusión de relaciones con categoría y autores
+  async findOne(id: string): Promise<Book> {
+    const book = await this.booksRepo.findOne({ 
+      where: { id },
+      relations: ['category', 'authors'],
     });
-    if (!book) throw new NotFoundException('Book not found'); // Validación de que el libro existe
-    return book; // Retorno del libro encontrado
+    if (!book) throw new NotFoundException('Book not found');
+    return book;
   }
 
-  async remove(id: string): Promise<void> { // Declaración del método para eliminar libro con tipo de retorno void
-    const result = await this.booksRepo.delete(id); // Operación de eliminar libro de la base de datos
-    if (result.affected === 0) throw new NotFoundException('Book not found'); // Validación de que se eliminó el libro
+  async remove(id: string): Promise<void> {
+    const result = await this.booksRepo.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Book not found');
   }
 
-  async updateCopies(id: string, delta: number): Promise<Book> { // Declaración del método para actualizar copias con tipo de retorno
-    const book = await this.findOne(id); // Obtención del libro por ID
-    book.copiesAvailable = Math.max((book.copiesAvailable ?? 0) + delta, 0); // Actualización de copias disponibles con límite mínimo 0
-    return this.booksRepo.save(book); // Operación de guardar cambios en la base de datos
+  // Handles updating stock by a positive or negative 'delta'
+  async updateCopies(id: string, delta: number): Promise<Book> {
+    const book = await this.findOne(id);
+    // Ensure copiesAvailable never drops below zero (Math.max)
+    book.copiesAvailable = Math.max((book.copiesAvailable ?? 0) + delta, 0); 
+    return this.booksRepo.save(book);
   }
 }

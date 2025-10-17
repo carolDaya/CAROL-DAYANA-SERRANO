@@ -1,13 +1,45 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common'; // Importación de decoradores y funciones de NestJS
-import { UsersService } from './users.service'; // Importación del servicio UsersService
+import { 
+    Controller, 
+    Get, Post, Patch, Delete, 
+    Param, Body, UseGuards, 
+    HttpCode, HttpStatus 
+} from '@nestjs/common';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto'; 
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; 
+import { User } from './user.entity'; 
 
-@Controller('users') // Decorador que define el controlador con ruta base 'users'
-export class UsersController { // Declaración de la clase UsersController
-  constructor(private svc: UsersService) {} // Inyección del servicio UsersService
+@Controller('users')
+@UseGuards(JwtAuthGuard) 
+export class UsersController {
+  
+  constructor(private readonly svc: UsersService) {}
 
-  @Get() findAll() { return this.svc.findAll(); } // Decorador para método GET y llamada al servicio
-  @Get(':id') findOne(@Param('id') id: string) { return this.svc.findOne(id); } // Decorador para GET con parámetro y llamada al servicio
-  @Post() create(@Body() dto: any) { return this.svc.create(dto); } // Decorador para método POST y llamada al servicio
-  @Patch(':id') update(@Param('id') id: string, @Body() dto: any) { return this.svc.update(id, dto); } // Decorador para PATCH con parámetro y llamada al servicio
-  @Delete(':id') remove(@Param('id') id: string) { return this.svc.remove(id); } // Decorador para DELETE con parámetro y llamada al servicio
+  @Get()
+  findAll(): Promise<User[]> {
+    return this.svc.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string): Promise<User> {
+    return this.svc.findOne(id);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() dto: CreateUserDto): Promise<User> { 
+    return this.svc.create(dto);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto): Promise<User> { 
+    return this.svc.update(id, dto);
+  }
+  
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT) 
+  remove(@Param('id') id: string): Promise<{ deleted: true }> {
+    return this.svc.remove(id);
+  }
 }
