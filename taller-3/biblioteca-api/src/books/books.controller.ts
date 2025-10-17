@@ -7,45 +7,50 @@ import {
   Patch,
   Delete,
   UseGuards,
-} from '@nestjs/common'; // Importación de decoradores y funciones de NestJS
-import { BooksService } from './books.service'; // Importación del servicio BooksService
-import { CreateBookDto } from './create-book.dto'; // Importación del DTO para crear libros
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Importación del guard de autenticación JWT
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import { BooksService } from './books.service';
+import { CreateBookDto } from './dto/create-book.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Assuming this path is correct
 
-@Controller('books') // Decorador que define el controlador con ruta base 'books'
-export class BooksController { // Declaración de la clase BooksController
-  constructor(private readonly svc: BooksService) {} // Inyección del servicio BooksService como readonly
+@Controller('books')
+export class BooksController {
+  constructor(private readonly svc: BooksService) {}
 
-  // Obtener todos los libros
-  @Get() // Decorador para método GET
-  findAll() { // Declaración del método para obtener todos los libros
-    return this.svc.findAll(); // Llamada al servicio para obtener todos los libros
+  // Retrieves all books
+  @Get()
+  findAll() {
+    return this.svc.findAll();
   }
 
-  // Obtener un libro por ID
-  @Get(':id') // Decorador para método GET con parámetro id
-  findOne(@Param('id') id: string) { // Declaración del método para obtener un libro por ID
-    return this.svc.findOne(id); // Llamada al servicio para obtener un libro por ID
+  // Retrieves a book by ID
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.svc.findOne(id);
   }
 
-  // Crear un nuevo libro (requiere autenticación)
-  @UseGuards(JwtAuthGuard) // Decorador para aplicar guard de autenticación JWT
-  @Post() // Decorador para método POST
-  create(@Body() dto: CreateBookDto) { // Declaración del método para crear libro
-    return this.svc.create(dto); // Llamada al servicio para crear libro
+  // Creates a new book (Authentication required)
+  @UseGuards(JwtAuthGuard) 
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() dto: CreateBookDto) {
+    return this.svc.create(dto);
   }
 
-  // Actualizar la cantidad de copias disponibles (requiere autenticación)
-  @UseGuards(JwtAuthGuard) // Decorador para aplicar guard de autenticación JWT
-  @Patch(':id/copies/:delta') // Decorador para método PATCH con parámetros id y delta
-  updateCopies(@Param('id') id: string, @Param('delta') delta: string) { // Declaración del método para actualizar copias
-    return this.svc.updateCopies(id, Number(delta)); // Llamada al servicio para actualizar copias con conversión a número
+  // Updates the number of available copies (Authentication required)
+  // Delta represents the change (e.g., +5 for stock refill, -1 for a loan)
+  @UseGuards(JwtAuthGuard) 
+  @Patch(':id/copies/:delta')
+  updateCopies(@Param('id') id: string, @Param('delta') delta: string) {
+    return this.svc.updateCopies(id, Number(delta));
   }
 
-  // Eliminar un libro (requiere autenticación)
-  @UseGuards(JwtAuthGuard) // Decorador para aplicar guard de autenticación JWT
-  @Delete(':id') // Decorador para método DELETE con parámetro id
-  remove(@Param('id') id: string) { // Declaración del método para eliminar libro
-    return this.svc.remove(id); // Llamada al servicio para eliminar libro
+  // Removes a book (Authentication required)
+  @UseGuards(JwtAuthGuard) 
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: string) {
+    return this.svc.remove(id);
   }
 }

@@ -1,0 +1,29 @@
+@baseUrl = http://localhost:3000
+@categoryId = 59e0269d-65dd-4d13-9d62-acd599acfbdd
+
+### 1. CREAR CATEGORÍA
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "name": "Novel fiction"
+}
+
+> {% client.global.set("categoryId", response.body.id) %}
+
+### 2. OBTENER TODAS LAS CATEGORÍAS
+GET {{baseUrl}}/categories
+
+### 3. OBTENER CATEGORÍA POR ID
+GET {{baseUrl}}/categories/{{categoryId}}
+
+### 4. ACTUALIZAR CATEGORÍA
+PATCH {{baseUrl}}/categories/{{categoryId}}
+Content-Type: application/json
+
+{
+  "name": "Novel Fiction (Actualizado)"
+}
+
+### 5. ELIMINAR CATEGORÍA
+DELETE {{baseUrl}}/categories/{{categoryId}}

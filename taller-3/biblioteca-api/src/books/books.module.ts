@@ -1,15 +1,15 @@
-import { Module } from '@nestjs/common'; // Importación del decorador Module de NestJS
-import { TypeOrmModule } from '@nestjs/typeorm'; // Importación del módulo TypeORM para NestJS
-import { Book } from './book.entity'; // Importación de la entidad Book
-import { BooksService } from './books.service'; // Importación del servicio BooksService
-import { BooksController } from './books.controller'; // Importación del controlador BooksController
-import { Category } from '../categories/category.entity'; // Importación de la entidad Category
-import { Author } from '../authors/author.entity'; // Importación de la entidad Author
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Book } from './book.entity';
+import { BooksService } from './books.service';
+import { BooksController } from './books.controller';
+import { Category } from '../categories/category.entity';
+import { Author } from '../authors/author.entity';
 
-@Module({ // Decorador que define un módulo de NestJS
-  imports: [TypeOrmModule.forFeature([Book, Category, Author])], // Configuración de importaciones con múltiples entidades
-  providers: [BooksService], // Declaración de proveedores del módulo
-  controllers: [BooksController], // Declaración de controladores del módulo
-  exports: [BooksService], // Exportación de servicios para uso externo
+@Module({
+  imports: [TypeOrmModule.forFeature([Book, Category, Author])],
+  providers: [BooksService],
+  controllers: [BooksController],
+  exports: [BooksService],
 })
-export class BooksModule {} // Declaración de la clase del módulo BooksModule
+export class BooksModule {}
