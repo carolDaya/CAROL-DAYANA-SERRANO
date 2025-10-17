@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common'; // Importación de decoradores y funciones de NestJS
 import { BooksService } from './books.service'; // Importación del servicio BooksService
 import { CreateBookDto } from './create-book.dto'; // Importación del DTO para crear libros
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // Importación del guard de autenticación JWT
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Importación del guard de autenticación JWT
 
 @Controller('books') // Decorador que define el controlador con ruta base 'books'
 export class BooksController { // Declaración de la clase BooksController

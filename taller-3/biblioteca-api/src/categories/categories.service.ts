@@ -1,33 +1,54 @@
-import { Injectable, NotFoundException } from '@nestjs/common'; // Importación de decoradores y excepciones de NestJS
-import { InjectRepository } from '@nestjs/typeorm'; // Importación del decorador para inyectar repositorios
-import { Repository } from 'typeorm'; // Importación de Repository para operaciones de base de datos
-import { Category } from './category.entity'; // Importación de la entidad Category
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Category } from './category.entity';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
-@Injectable() // Decorador que marca como servicio inyectable
-export class CategoriesService { // Declaración de la clase CategoriesService
-  constructor(@InjectRepository(Category) private repo: Repository<Category>) {} // Inyección del repositorio de categorías
+@Injectable()
+export class CategoriesService {
+  constructor(
+    @InjectRepository(Category) 
+    private repo: Repository<Category> // Inject Category repository
+  ) {}
 
-  findAll() { return this.repo.find(); } // Declaración del método para buscar todas las categorías
-
-  async findOne(id: string) { // Declaración del método para buscar una categoría por ID
-    const category = await this.repo.findOne({ where: { id } }); // Consulta para buscar categoría por ID
-    if (!category) throw new NotFoundException('Category not found'); // Validación de que la categoría existe
-    return category; // Retorno de la categoría encontrada
+  // Retrieves all categories
+  findAll(): Promise<Category[]> { 
+    return this.repo.find(); 
   }
 
-  async create(data: Partial<Category>) { // Declaración del método para crear categoría
-    const category = this.repo.create(data); // Creación de instancia de categoría
-    return this.repo.save(category); // Operación de guardar categoría en la base de datos
+  // Retrieves a category by ID
+  async findOne(id: string): Promise<Category> { 
+    const category = await this.repo.findOne({ where: { id } });
+    if (!category) {
+      // Throw error if category is not found
+      throw new NotFoundException(`Category with ID "${id}" not found`);
+    }
+    return category;
   }
 
-  async update(id: string, data: Partial<Category>) { // Declaración del método para actualizar categoría
-    await this.repo.update(id, data); // Operación de actualizar categoría en la base de datos
-    return this.findOne(id); // Retorno de la categoría actualizada
+  // Creates a new category from DTO data
+  async create(data: CreateCategoryDto): Promise<Category> { 
+    const category = this.repo.create(data); 
+    return this.repo.save(category);
   }
 
-  async remove(id: string) { // Declaración del método para eliminar categoría
-    const res = await this.repo.delete(id); // Operación de eliminar categoría de la base de datos
-    if (!res.affected) throw new NotFoundException('Category not found'); // Validación de que se eliminó la categoría
-    return { deleted: true }; // Retorno de confirmación de eliminación
+  // Updates an existing category by ID
+  async update(id: string, data: UpdateCategoryDto): Promise<Category> { 
+    await this.repo.update(id, data);
+    // Fetch and return the updated entity
+    return this.findOne(id); 
+  }
+
+  // Removes a category by ID
+  async remove(id: string): Promise<{ deleted: true }> { 
+    const res = await this.repo.delete(id);
+    
+    // Check if any rows were affected
+    if (res.affected === 0) {
+      throw new NotFoundException(`Category with ID "${id}" not found`);
+    }
+    
+    return { deleted: true };
   }
 }

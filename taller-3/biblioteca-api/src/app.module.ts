@@ -29,7 +29,7 @@ import { ReviewsModule } from './reviews/reviews.module'; // Importación del m�
       host: process.env.DB_HOST || 'localhost', // Host de la base de datos con valor por defecto
       port: +(process.env.DB_PORT || 5432),  // Puerto de la base de datos con valor por defecto
       username: process.env.DB_USER || 'postgres', // Usuario de la base de datos con valor por defecto
-      password: process.env.DB_PASS || 'power7531', // Contraseña de la base de datos con valor por defecto
+      password: process.env.DB_PASS || '1234', // Contraseña de la base de datos con valor por defecto
       database: process.env.DB_NAME || 'biblioteca_db', // Nombre de la base de datos con valor por defecto
       autoLoadEntities: true, // Carga automática de todas las entidades registradas en los módulos
       synchronize: true, // Sincronización automática del esquema (solo desarrollo)

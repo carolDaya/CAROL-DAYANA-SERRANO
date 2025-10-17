@@ -1,35 +1,69 @@
-import { Injectable, NotFoundException } from '@nestjs/common'; // Importación de decoradores y excepciones de NestJS
-import { InjectRepository } from '@nestjs/typeorm'; // Importación del decorador para inyectar repositorios
-import { Repository } from 'typeorm'; // Importación de Repository para operaciones de base de datos
-import { User } from './user.entity'; // Importación de la entidad User
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt'; 
+import { User } from './user.entity';
+import { CreateUserDto } from './dto/create-user.dto'; 
+import { UpdateUserDto } from './dto/update-user.dto';
 
-@Injectable() // Decorador que marca como servicio inyectable
-export class UsersService { // Declaración de la clase UsersService
-  constructor(@InjectRepository(User) private repo: Repository<User>) {} // Inyección del repositorio de usuarios
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User) 
+    private readonly repo: Repository<User>
+  ) {}
 
-  findAll() { // Declaración del método para buscar todos los usuarios
-    return this.repo.find(); // Operación de buscar todos los usuarios
+  /**
+   * Finds all users.
+   * The password is excluded by default if { select: false } is set in the entity.
+   */
+  findAll(): Promise<User[]> {
+    return this.repo.find();
   }
 
-  async findOne(id: string) { // Declaración del método para buscar un usuario por ID
-    const user = await this.repo.findOne({ where: { id } }); // Consulta para buscar usuario por ID
-    if (!user) throw new NotFoundException('User not found'); // Validación de que el usuario existe
-    return user; // Retorno del usuario encontrado
+  /**
+   * Finds a single user by ID. Throws NotFoundException if not found.
+   */
+  async findOne(id: string): Promise<User> {
+    const user = await this.repo.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID "${id}" not found`);
+    }
+    return user;
   }
 
-  async create(data: Partial<User>) { // Declaración del método para crear usuario
-    const user = this.repo.create(data); // Creación de instancia de usuario
-    return this.repo.save(user); // Operación de guardar usuario en la base de datos
+  /**
+   * Creates a new user using validated data from CreateUserDto.
+   */
+  async create(data: CreateUserDto): Promise<User> {
+    const hashedPassword = await bcrypt.hash(data.password, 10); 
+    const user = this.repo.create({ 
+        ...data, 
+        password: hashedPassword 
+    }); 
+    return this.repo.save(user);
   }
 
-  async update(id: string, data: Partial<User>) { // Declaración del método para actualizar usuario
-    await this.repo.update(id, data); // Operación de actualizar usuario en la base de datos
-    return this.findOne(id); // Retorno del usuario actualizado
+  /**
+   * Updates an existing user with partial data from UpdateUserDto.
+   */
+  async update(id: string, data: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id); 
+    Object.assign(user, data); 
+    return this.repo.save(user);
   }
 
-  async remove(id: string) { // Declaración del método para eliminar usuario
-    const res = await this.repo.delete(id); // Operación de eliminar usuario de la base de datos
-    if (!res.affected) throw new NotFoundException('User not found'); // Validación de que se eliminó el usuario
-    return { deleted: true }; // Retorno de confirmación de eliminación
+  /**
+   * Removes a user by ID. Throws NotFoundException if no user is affected.
+   */
+  async remove(id: string): Promise<{ deleted: true }> {
+    const res = await this.repo.delete(id);
+    
+    // Check if any row was affected
+    if (res.affected === 0) {
+      throw new NotFoundException(`User with ID "${id}" not found`);
+    }
+    
+    return { deleted: true };
   }
 }
