@@ -1,0 +1,34 @@
+@baseUrl = http://localhost:3000
+@token = {{token}}
+
+### CREAR UN AUTOR
+POST {{baseUrl}}/authors
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "B. Lopez",
+  "biography": "Autor prueba."
+}
+
+###  LISTAR LOS AUTORES Y SUS RELACIONES
+GET {{baseUrl}}/authors
+Authorization: Bearer {{token}}
+
+### OBTENER AUTOR POR ID
+GET {{baseUrl}}/authors/2
+Authorization: Bearer {{token}}
+
+### ACTUALIZAR AUTOR
+PATCH {{baseUrl}}/authors/2
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "A. Herrera",
+  "biography": "Filosofo y escritor colombiano."
+}
+
+### ELIMINAR AUTOR
+DELETE {{baseUrl}}/authors/3
+Authorization: Bearer {{token}}

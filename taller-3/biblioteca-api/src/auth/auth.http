@@ -1,0 +1,22 @@
+@baseUrl = http://localhost:3000
+
+### REGISTRO DE USUARIO
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "usuario12@biblioteca.com",
+  "password": "123456",
+  "name": "Usuario de prueba"
+}
+
+### LOGIN - Guarda automáticamente el token en {{token}}
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuario1@biblioteca.com",
+  "password": "123456"
+}
+
+> {% client.global.set("token", response.body.access_token); %}

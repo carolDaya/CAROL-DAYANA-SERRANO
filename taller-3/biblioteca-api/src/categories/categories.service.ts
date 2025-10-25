@@ -5,50 +5,53 @@ import { Category } from './category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
+// Indica que puede ser inyectado como servicio
 @Injectable()
 export class CategoriesService {
   constructor(
-    @InjectRepository(Category) 
-    private repo: Repository<Category> // Inject Category repository
+    @InjectRepository(Category)
+    private readonly categoryRepo: Repository<Category>,
   ) {}
 
-  // Retrieves all categories
-  findAll(): Promise<Category[]> { 
-    return this.repo.find(); 
+  // Crea una nueva categoría
+  async create(dto: CreateCategoryDto): Promise<Category> {
+    const category = this.categoryRepo.create({
+      name: dto.name,
+      description: dto.description ?? null,
+    });
+    return this.categoryRepo.save(category);
   }
 
-  // Retrieves a category by ID
-  async findOne(id: string): Promise<Category> { 
-    const category = await this.repo.findOne({ where: { id } });
-    if (!category) {
-      // Throw error if category is not found
-      throw new NotFoundException(`Category with ID "${id}" not found`);
-    }
+  // Retorna todas las categorías con sus relaciones
+  async findAll(): Promise<Category[]> {
+    return this.categoryRepo.find({ relations: ['books'] });
+  }
+
+  // Busca una categoría por id
+  async findOne(id: number): Promise<Category> {
+    const category = await this.categoryRepo.findOne({
+      where: { id },
+      relations: ['books'],
+    });
+    if (!category) throw new NotFoundException('Category not found');
     return category;
   }
 
-  // Creates a new category from DTO data
-  async create(data: CreateCategoryDto): Promise<Category> { 
-    const category = this.repo.create(data); 
-    return this.repo.save(category);
-  }
+  // Actualiza una categoría existente
+  async update(id: number, dto: UpdateCategoryDto): Promise<Category> {
+    const category = await this.findOne(id);
 
-  // Updates an existing category by ID
-  async update(id: string, data: UpdateCategoryDto): Promise<Category> { 
-    await this.repo.update(id, data);
-    // Fetch and return the updated entity
-    return this.findOne(id); 
-  }
-
-  // Removes a category by ID
-  async remove(id: string): Promise<{ deleted: true }> { 
-    const res = await this.repo.delete(id);
-    
-    // Check if any rows were affected
-    if (res.affected === 0) {
-      throw new NotFoundException(`Category with ID "${id}" not found`);
+    if (dto.name !== undefined) category.name = dto.name;
+    if (dto.description !== undefined) {
+      category.description = dto.description ?? null;
     }
-    
-    return { deleted: true };
+
+    return this.categoryRepo.save(category);
+  }
+
+  // Elimina una categoría por id
+  async remove(id: number): Promise<void> {
+    const category = await this.findOne(id);
+    await this.categoryRepo.remove(category);
   }
 }

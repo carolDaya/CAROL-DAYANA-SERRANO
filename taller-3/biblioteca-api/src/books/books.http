@@ -1,0 +1,48 @@
+@baseUrl = http://localhost:3000
+@contentType = application/json
+@token = {{token}}
+
+### OBTENER TODOS LOS LIBROS
+GET {{baseUrl}}/books
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### OBTENER UN LIBRO POR ID
+GET {{baseUrl}}/books/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### CREAR UN NUEVO LIBRO 
+POST {{baseUrl}}/books
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "title": "Accion de los robots",
+  "isbn": "978-3-16-148410-0",
+  "description": "Una novela de ciencia ficción sobre robots y humanidad.",
+  "publishedAt": "2023-05-15",
+  "copies": 4,
+  "copiesAvailable": 4,
+  "categoryId": 1,
+  "authorId": 1
+}
+
+
+### ACTUALIZAR UN LIBRO - MODIFICA SOLO LO ENVIADO
+PATCH {{baseUrl}}/books/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "title": "Cien años de soledad (ed. corregida)",
+  "copies": 12,
+  "copiesAvailable": 11,
+  "categoryId": 4,
+  "description": "Edición corregida y aumentada"
+}
+
+### ELIMINAR UN LIBRO
+DELETE {{baseUrl}}/books/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
