@@ -1,0 +1,37 @@
+@baseUrl = http://localhost:3000
+@contentType = application/json
+@token = {{token}}
+
+### CREAR USUARIO - DISPONIBLE TAMBIEN EN REGISTER
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Usuario Ejemplo desde Users",
+  "email": "user3@biblioteca.com",
+  "password": "secret123"
+}
+
+### LISTAR USUARIOS
+GET {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### OBTENER USUARIO POR ID
+GET {{baseUrl}}/users/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### ACTUALIZAR USUARIO POR ID
+PATCH {{baseUrl}}/users/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "Nombre nuevo"
+}
+
+### ELIMINAR USUARIO POR ID
+DELETE {{baseUrl}}/users/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}

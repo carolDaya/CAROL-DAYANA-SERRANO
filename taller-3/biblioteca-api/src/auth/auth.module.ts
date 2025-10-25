@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common'; 
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
 import { PassportModule } from '@nestjs/passport';
@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 
+// Modulo de Autenticación
 @Module({
   imports: [
     ConfigModule,

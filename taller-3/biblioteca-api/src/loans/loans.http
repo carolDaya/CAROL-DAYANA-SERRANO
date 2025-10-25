@@ -1,0 +1,41 @@
+@baseUrl = http://localhost:3000
+@contentType = application/json
+@token = {{token}}
+
+### CREAR PRESTAMO
+POST {{baseUrl}}/loans
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "userId": 1,
+  "bookId": 4,
+  "loanDate": "2025-10-02",
+  "returnDate": "2025-11-02"
+}
+
+### LISTAR PRESTAMOS
+GET {{baseUrl}}/loans
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### OBTENER PRESTAMO CON ID
+GET {{baseUrl}}/loans/2
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### MARCAR DEVOLUCION O ACTUALIZAR PRESTAMO
+PATCH {{baseUrl}}/loans/4
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "returnDate": "2025-11-02",
+  "returned": true
+}
+
+### ELIMINAR PRESTAMO
+DELETE {{baseUrl}}/loans/4
+Authorization: Bearer {{token}}
+Accept: application/json
+

@@ -15,6 +15,7 @@ import { AuthorsModule } from './authors/authors.module'; // Importación del m�
 import { CategoriesModule } from './categories/categories.module'; // Importación del módulo de categorías
 import { LoansModule } from './loans/loans.module'; // Importación del módulo de préstamos
 import { ReviewsModule } from './reviews/reviews.module'; // Importación del módulo de reseñas
+import { ProfilesModule } from './profiles/profiles.module'; // Importación del módulo de perfiles
 
 @Module({ // Decorador que define el módulo principal de NestJS
   imports: [ // Configuración de importaciones del módulo
@@ -29,11 +30,12 @@ import { ReviewsModule } from './reviews/reviews.module'; // Importación del m�
       host: process.env.DB_HOST || 'localhost', // Host de la base de datos con valor por defecto
       port: +(process.env.DB_PORT || 5432),  // Puerto de la base de datos con valor por defecto
       username: process.env.DB_USER || 'postgres', // Usuario de la base de datos con valor por defecto
-      password: process.env.DB_PASS || '1234', // Contraseña de la base de datos con valor por defecto
+      password: process.env.DB_PASS || 'power7531', // Contraseña de la base de datos con valor por defecto
       database: process.env.DB_NAME || 'biblioteca_db', // Nombre de la base de datos con valor por defecto
       autoLoadEntities: true, // Carga automática de todas las entidades registradas en los módulos
       synchronize: true, // Sincronización automática del esquema (solo desarrollo)
       logging: true, // Registra las consultas SQL en consola (útil para depurar)
+    
     }),
 
     // Módulos funcionales
@@ -41,9 +43,10 @@ import { ReviewsModule } from './reviews/reviews.module'; // Importación del m�
     AuthModule, // Importación del módulo de autenticación
     BooksModule, // Importación del módulo de libros
     AuthorsModule, // Importación del módulo de autores
-    CategoriesModule, // Importación del módulo de categorías
-    LoansModule, // Importación del módulo de préstamos
+    CategoriesModule, // Importación del módulo de categorias
+    LoansModule, // Importación del módulo de prestamos
     ReviewsModule, // Importación del módulo de reseñas
+    ProfilesModule, // Importación del módulo de perfiles
   ],
 
   controllers: [AppController], // Declaración de controladores del módulo

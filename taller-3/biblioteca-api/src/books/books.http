@@ -18,31 +18,31 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
 {
-  "title": "Accion de los robots",
-  "isbn": "978-3-16-148410-0",
-  "description": "Una novela de ciencia ficción sobre robots y humanidad.",
+  "title": "Firul",
+  "isbn": "978-3-16-121547-0",
+  "description": "Una novela de acción.",
   "publishedAt": "2023-05-15",
   "copies": 4,
   "copiesAvailable": 4,
   "categoryId": 1,
-  "authorId": 1
+  "authorId": 2
 }
 
 
 ### ACTUALIZAR UN LIBRO - MODIFICA SOLO LO ENVIADO
-PATCH {{baseUrl}}/books/2
+PATCH {{baseUrl}}/books/3
 Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
 {
-  "title": "Cien años de soledad (ed. corregida)",
+  "title": "Final - Actualizado",
   "copies": 12,
   "copiesAvailable": 11,
-  "categoryId": 4,
-  "description": "Edición corregida y aumentada"
+  "categoryId": 1,
+  "description": "Edición corregida"
 }
 
 ### ELIMINAR UN LIBRO
-DELETE {{baseUrl}}/books/1
+DELETE {{baseUrl}}/books/3
 Content-Type: {{contentType}}
 Authorization: Bearer {{token}}

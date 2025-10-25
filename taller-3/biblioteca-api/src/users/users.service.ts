@@ -1,69 +1,59 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt'; 
 import { User } from './user.entity';
-import { CreateUserDto } from './dto/create-user.dto'; 
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcryptjs';
 
+// Servicio que maneja la lógica de negocio relacionada con los usuarios
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) 
-    private readonly repo: Repository<User>
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
-  /**
-   * Finds all users.
-   * The password is excluded by default if { select: false } is set in the entity.
-   */
-  findAll(): Promise<User[]> {
-    return this.repo.find();
+  // Crear un nuevo usuario con validación de email único y hash de contraseña
+  async create(dto: CreateUserDto): Promise<User> {
+    const existing = await this.userRepo.findOne({ where: { email: dto.email } });
+    if (existing) throw new ConflictException('Email already registered');
+
+    const hash = await bcrypt.hash(dto.password, 10);
+    const ent = this.userRepo.create({ ...dto, password: hash });
+    return this.userRepo.save(ent);
   }
 
-  /**
-   * Finds a single user by ID. Throws NotFoundException if not found.
-   */
-  async findOne(id: string): Promise<User> {
-    const user = await this.repo.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`User with ID "${id}" not found`);
-    }
+  // Obtener todos los usuarios
+  findAll(): Promise<User[]> {
+    return this.userRepo.find();
+  }
+
+  // Buscar un usuario por ID
+  async findOne(id: number): Promise<User> {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
-  /**
-   * Creates a new user using validated data from CreateUserDto.
-   */
-  async create(data: CreateUserDto): Promise<User> {
-    const hashedPassword = await bcrypt.hash(data.password, 10); 
-    const user = this.repo.create({ 
-        ...data, 
-        password: hashedPassword 
-    }); 
-    return this.repo.save(user);
-  }
-
-  /**
-   * Updates an existing user with partial data from UpdateUserDto.
-   */
-  async update(id: string, data: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id); 
-    Object.assign(user, data); 
-    return this.repo.save(user);
-  }
-
-  /**
-   * Removes a user by ID. Throws NotFoundException if no user is affected.
-   */
-  async remove(id: string): Promise<{ deleted: true }> {
-    const res = await this.repo.delete(id);
-    
-    // Check if any row was affected
-    if (res.affected === 0) {
-      throw new NotFoundException(`User with ID "${id}" not found`);
+  // Actualizar datos de un usuario (re-hashea la contraseña si se cambia)
+  async update(id: number, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+    if (dto.password) {
+      dto.password = await bcrypt.hash(dto.password, 10);
     }
-    
-    return { deleted: true };
+    Object.assign(user, dto);
+    return this.userRepo.save(user);
+  }
+
+  // Eliminar un usuario
+  async remove(id: number): Promise<void> {
+    const user = await this.findOne(id);
+    await this.userRepo.remove(user);
+  }
+
+  // Buscar usuario por email (usado en autenticación)
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { email } });
   }
 }

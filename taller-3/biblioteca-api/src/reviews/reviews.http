@@ -1,0 +1,40 @@
+@baseUrl = http://localhost:3000
+@contentType = application/json
+@token = {{token}}
+
+### CREAR RESEÑA
+POST {{baseUrl}}/reviews
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "bookId": 2,
+  "userId": 1,
+  "content": "Excelente lectura",
+  "rating": 5
+}
+
+### LISTAR RESEÑAS
+GET {{baseUrl}}/reviews
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### OBTENER RESEÑA CON ID
+GET {{baseUrl}}/reviews/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### ACTUALIZAR RESEÑA
+PATCH {{baseUrl}}/reviews/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "content": "Actualizado: buen libro",
+  "rating": 4
+}
+
+### BORRAR RESEÑA
+DELETE {{baseUrl}}/reviews/4
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}

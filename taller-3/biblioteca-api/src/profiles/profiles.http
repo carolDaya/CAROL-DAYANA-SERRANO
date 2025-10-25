@@ -1,0 +1,41 @@
+@baseUrl = http://localhost:3000
+@contentType = application/json
+@token = {{token}}
+
+### CREAR PERFIL PARA USUARIO
+POST {{baseUrl}}/profiles
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "userId": 2,
+  "nickname": "lector88",
+  "bio": "Amante de la ciencia ficción",
+  "avatarUrl": "https://biblioteca.com/avatar.png"
+}
+
+### LISTAR PERFILES
+GET {{baseUrl}}/profiles
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### OBTENER PERFIL POR ID
+GET {{baseUrl}}/profiles/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### ACTUALIZAR PERFIL POR ID
+PATCH {{baseUrl}}/profiles/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "nickname": "lector1",
+  "bio": "Lectura nocturna",
+  "avatarUrl": "https://biblioteca.com/avatar.png"
+}
+
+### BORRAR PERFIL POR ID
+DELETE {{baseUrl}}/profiles/4
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}

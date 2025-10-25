@@ -8,7 +8,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
 ### OBTENER UNA CATEGORIA CON ID CON SUS LIBROS
-GET {{baseUrl}}/categories/2
+GET {{baseUrl}}/categories/1
 Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
@@ -18,8 +18,8 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
 {
-  "name": "Acción y Aventura",
-  "description": "Categoría para libros de acción y aventura"
+  "name": "Fantasia",
+  "description": "Categoría para libros de fantasia"
 }
 
 ### ACTUALIZAR UNA CATEGORIA EXISTENTE

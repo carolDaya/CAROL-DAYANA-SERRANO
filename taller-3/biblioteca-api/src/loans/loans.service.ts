@@ -1,49 +1,77 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'; // Importación de decoradores y excepciones de NestJS
-import { InjectRepository } from '@nestjs/typeorm'; // Importación del decorador para inyectar repositorios
-import { Repository } from 'typeorm'; // Importación de Repository para operaciones de base de datos
-import { Loan } from './loan.entity'; // Importación de la entidad Loan
-import { User } from '../users/user.entity'; // Importación de la entidad User
-import { Book } from '../books/book.entity'; // Importación de la entidad Book
-import { CreateLoanDto } from './create-loan.dto'; // Importación del DTO para crear préstamos
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Loan } from './loan.entity';
+import { CreateLoanDto } from './dto/create-loan.dto';
+import { UpdateLoanDto } from './dto/update-loan.dto';
+import { Book } from '../books/book.entity';
+import { User } from '../users/user.entity';
 
-@Injectable() // Decorador que marca como servicio inyectable
-export class LoansService { // Declaración de la clase LoansService
-  constructor( // Declaración del constructor con múltiples repositorios
-    @InjectRepository(Loan) private repo: Repository<Loan>, // Inyección del repositorio de préstamos
-    @InjectRepository(User) private userRepo: Repository<User>, // Inyección del repositorio de usuarios
-    @InjectRepository(Book) private bookRepo: Repository<Book>, // Inyección del repositorio de libros
+// Marca la clase como un servicio inyectable dentro del sistema de dependencias de NestJS
+@Injectable()
+export class LoansService {
+  // Inyección de repositorios TypeORM para las entidades Loan, Book y User
+  constructor(
+    @InjectRepository(Loan) private loanRepo: Repository<Loan>,
+    @InjectRepository(Book) private bookRepo: Repository<Book>,
+    @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
-  findAll() { return this.repo.find(); } // Declaración del método para buscar todos los préstamos
+  // Método para crear un nuevo préstamo
+  async create(dto: CreateLoanDto): Promise<Loan> {
+    // Busca el libro asociado al préstamo por su ID
+    const book = await this.bookRepo.findOne({ where: { id: dto.bookId } });
+    // Lanza una excepción si el libro no existe
+    if (!book) throw new NotFoundException('Book not found');
 
-  async create(dto: CreateLoanDto) { // Declaración del método para crear préstamo
-    const user = await this.userRepo.findOne({ where: { id: dto.userId } }); // Consulta para buscar usuario por ID
-    const book = await this.bookRepo.findOne({ where: { id: dto.bookId } }); // Consulta para buscar libro por ID
+    // Busca el usuario asociado al préstamo por su ID
+    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
+    // Lanza una excepción si el usuario no existe
+    if (!user) throw new NotFoundException('User not found');
 
-    if (!user || !book) throw new NotFoundException('User or Book not found'); // Validación de que usuario y libro existen
-    if (book.copiesAvailable < 1) throw new BadRequestException('Book not available'); // Validación de disponibilidad de copias
+    // Crea una nueva instancia de Loan con los datos proporcionados
+    const ent = this.loanRepo.create({
+      book,
+      user,
+      loanDate: dto.loanDate,
+      returnDate: dto.returnDate ?? null, // Usa null si no se proporciona fecha de devolución
+      returned: !!dto.returnDate, // Marca como devuelto si existe returnDate
+    });
 
-    book.copiesAvailable -= 1; // Decremento de copias disponibles
-    await this.bookRepo.save(book); // Operación de guardar cambios en el libro
-
-    const loan = this.repo.create({ user, book, loanDate: dto.loanDate }); // Creación de instancia de préstamo
-    return this.repo.save(loan); // Operación de guardar préstamo en la base de datos
+    // Guarda el préstamo en la base de datos y lo retorna
+    return this.loanRepo.save(ent);
   }
 
-  async markReturned(id: string) { // Declaración del método para marcar préstamo como devuelto
-    const loan = await this.repo.findOne({ where: { id } }); // Consulta para buscar préstamo por ID
-    if (!loan) throw new NotFoundException('Loan not found'); // Validación de que el préstamo existe
-    if (loan.returned) throw new BadRequestException('Already returned'); // Validación de que no está ya devuelto
+  // Retorna todos los préstamos registrados
+  findAll(): Promise<Loan[]> {
+    return this.loanRepo.find();
+  }
 
-    loan.returned = true; // Marcado como devuelto
-    await this.repo.save(loan); // Operación de guardar cambios en el préstamo
+  // Busca un préstamo específico por ID
+  async findOne(id: number): Promise<Loan> {
+    const l = await this.loanRepo.findOne({ where: { id } });
+    // Lanza excepción si no se encuentra el préstamo
+    if (!l) throw new NotFoundException('Loan not found');
+    return l;
+  }
 
-    const book = await this.bookRepo.findOne({ where: { id: loan.book.id } }); // Consulta para buscar libro asociado
-    if (book) { // Validación de que el libro existe
-      book.copiesAvailable += 1; // Incremento de copias disponibles
-      await this.bookRepo.save(book); // Operación de guardar cambios en el libro
-    }
+  // Actualiza los datos de un préstamo existente
+  async update(id: number, dto: UpdateLoanDto): Promise<Loan> {
+    // Verifica que el préstamo exista antes de actualizarlo
+    const l = await this.findOne(id);
+    // Asigna las nuevas propiedades desde el DTO
+    Object.assign(l, dto);
+    // Si se proporciona una fecha de devolución, marca como devuelto
+    if (dto.returnDate) l.returned = true;
+    // Guarda los cambios en la base de datos
+    return this.loanRepo.save(l);
+  }
 
-    return { returned: true }; // Retorno de confirmación de devolución
+  // Elimina un préstamo por su ID
+  async remove(id: number): Promise<void> {
+    // Verifica que el préstamo exista antes de eliminarlo
+    const l = await this.findOne(id);
+    // Elimina el registro del repositorio
+    await this.loanRepo.remove(l);
   }
 }

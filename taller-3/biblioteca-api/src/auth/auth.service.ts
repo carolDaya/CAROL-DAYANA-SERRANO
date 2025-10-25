@@ -39,7 +39,7 @@ export class AuthService { // Declaración de la clase AuthService
     return { access_token: this.jwtService.sign(payload) }; // Retorno del objeto con token JWT firmado
   }
 
-  async findById(id: string) { // Declaración del método para buscar usuario por ID
+  async findById(id: number) { // Declaración del método para buscar usuario por ID
     const user = await this.usersRepo.findOne({ where: { id } }); // Consulta para buscar usuario por ID
     if (!user) throw new UnauthorizedException('User not found'); // Validación de que el usuario existe
     return user; // Retorno del usuario encontrado

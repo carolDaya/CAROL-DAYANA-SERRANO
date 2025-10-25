@@ -1,26 +1,66 @@
-import { Injectable, NotFoundException } from '@nestjs/common'; // Importación de decoradores y excepciones de NestJS
-import { InjectRepository } from '@nestjs/typeorm'; // Importación del decorador para inyectar repositorios
-import { Repository } from 'typeorm'; // Importación de Repository para operaciones de base de datos
-import { Review } from './review.entity'; // Importación de la entidad Review
-import { User } from '../users/user.entity'; // Importación de la entidad User
-import { Book } from '../books/book.entity'; // Importación de la entidad Book
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Review } from './review.entity';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { UpdateReviewDto } from './dto/update-review.dto';
+import { Book } from '../books/book.entity';
+import { User } from '../users/user.entity';
 
-@Injectable() // Decorador que marca como servicio inyectable
-export class ReviewsService { // Declaración de la clase ReviewsService
-  constructor( // Declaración del constructor con múltiples repositorios
-    @InjectRepository(Review) private repo: Repository<Review>, // Inyección del repositorio de reseñas
-    @InjectRepository(User) private userRepo: Repository<User>, // Inyección del repositorio de usuarios
-    @InjectRepository(Book) private bookRepo: Repository<Book>, // Inyección del repositorio de libros
+// Servicio que maneja la lógica de las reseñas
+@Injectable()
+export class ReviewsService {
+  constructor(
+    @InjectRepository(Review) private reviewRepo: Repository<Review>,
+    @InjectRepository(Book) private bookRepo: Repository<Book>,
+    @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
-  findAll() { return this.repo.find(); } // Declaración del método para buscar todas las reseñas
+  // Crear una nueva reseña
+  async create(dto: CreateReviewDto): Promise<Review> {
+    const book = await this.bookRepo.findOne({ where: { id: dto.bookId } });
+    if (!book) throw new NotFoundException('Book not found');
 
-  async create(data: any) { // Declaración del método para crear reseña
-    const user = await this.userRepo.findOne({ where: { id: data.userId } }); // Consulta para buscar usuario por ID
-    const book = await this.bookRepo.findOne({ where: { id: data.bookId } }); // Consulta para buscar libro por ID
-    if (!user || !book) throw new NotFoundException('User or Book not found'); // Validación de que usuario y libro existen
+    // Busca el usuario solo si se proporciona userId
+    const user = dto.userId
+      ? await this.userRepo.findOne({ where: { id: dto.userId } })
+      : null;
 
-    const review = this.repo.create({ rating: data.rating, comment: data.comment, user, book }); // Creación de instancia de reseña
-    return this.repo.save(review); // Operación de guardar reseña en la base de datos
+    if (dto.userId && !user) throw new NotFoundException('User not found');
+
+    // Crea y guarda la reseña
+    const ent = this.reviewRepo.create({
+      book,
+      user,
+      content: dto.content,
+      rating: dto.rating,
+    });
+
+    return this.reviewRepo.save(ent);
+  }
+
+  // Obtener todas las reseñas
+  findAll(): Promise<Review[]> {
+    return this.reviewRepo.find();
+  }
+
+  // Buscar una reseña por ID
+  async findOne(id: number): Promise<Review> {
+    const r = await this.reviewRepo.findOne({ where: { id } });
+    if (!r) throw new NotFoundException('Review not found');
+    return r;
+  }
+
+  // Actualizar una reseña existente
+  async update(id: number, dto: UpdateReviewDto): Promise<Review> {
+    const r = await this.findOne(id);
+    Object.assign(r, dto);
+    return this.reviewRepo.save(r);
+  }
+
+  // Eliminar una reseña
+  async remove(id: number): Promise<void> {
+    const r = await this.findOne(id);
+    await this.reviewRepo.remove(r);
   }
 }
