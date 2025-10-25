@@ -1,17 +1,17 @@
-import { IsString, IsEmail, MinLength, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
+// DTO para crear un nuevo usuario
 export class CreateUserDto {
-  
-  @IsEmail()
-  @IsNotEmpty()
-  readonly email: string;
+  // Nombre del usuario
+  @IsString()
+  name: string;
 
+  // Correo electrónico válido
+  @IsEmail()
+  email: string;
+
+  // Contraseña (mínimo 6 caracteres)
   @IsString()
-  @IsNotEmpty()
-  readonly name: string;
-  
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(8, { message: 'Password must be at least 8 characters long' })
-  readonly password: string;
+  @MinLength(6)
+  password: string;
 }

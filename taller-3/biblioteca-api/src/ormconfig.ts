@@ -20,6 +20,6 @@ export const AppDataSource = new DataSource({
   // ⚙️ Configuración de sincronización de entidades (solo recomendable en desarrollo)
   synchronize: true, // dev only
 
-  // 🧾 Desactivación del registro de consultas SQL en consola
-  logging: false,
+  // 🧾 Activación del registro de consultas SQL en consola
+  logging: true,
 });

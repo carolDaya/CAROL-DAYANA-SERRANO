@@ -5,12 +5,12 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "email": "usuario12@biblioteca.com",
+  "email": "usuario5@biblioteca.com",
   "password": "123456",
   "name": "Usuario de prueba"
 }
 
-### LOGIN - Guarda automáticamente el token en {{token}}
+### LOGIN - GUARDA EL TOKEN EN {{token}} - PRIMERO DEBE INGRESAR PARA PODER ACCEDER A LAS FUNCIONES
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 

@@ -7,7 +7,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "B. Lopez",
+  "name": "T. Poll",
   "biography": "Autor prueba."
 }
 
@@ -20,7 +20,7 @@ GET {{baseUrl}}/authors/2
 Authorization: Bearer {{token}}
 
 ### ACTUALIZAR AUTOR
-PATCH {{baseUrl}}/authors/2
+PATCH {{baseUrl}}/authors/1
 Authorization: Bearer {{token}}
 Content-Type: application/json
 

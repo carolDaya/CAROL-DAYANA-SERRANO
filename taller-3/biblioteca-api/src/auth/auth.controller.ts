@@ -1,7 +1,7 @@
 import { Controller, Post, Body, BadRequestException } from '@nestjs/common'; // Importación de decoradores y excepciones de NestJS
 import { AuthService } from './auth.service'; // Importación del servicio AuthService
-import { RegisterDto } from './register.dto'; // Importación del DTO para registro
-import { LoginDto } from './login.dto'; // Importación del DTO para login
+import { RegisterDto } from './dto/register.dto'; // Importación del DTO para registro
+import { LoginDto } from './dto/login.dto'; // Importación del DTO para login
 
 @Controller('auth') // Decorador que define el controlador con ruta base 'auth'
 export class AuthController {
