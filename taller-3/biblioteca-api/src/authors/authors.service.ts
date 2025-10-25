@@ -1,33 +1,48 @@
-import { Injectable, NotFoundException } from '@nestjs/common'; // Importación de decoradores y excepciones de NestJS
-import { InjectRepository } from '@nestjs/typeorm'; // Importación del decorador para inyectar repositorios
-import { Repository } from 'typeorm'; // Importación de Repository para operaciones de base de datos
-import { Author } from './author.entity'; // Importación de la entidad Author
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Author } from './author.entity';
+import { CreateAuthorDto } from './dto/create-author.dto';
+import { UpdateAuthorDto } from './dto/update-author.dto';
 
-@Injectable() // Decorador que marca como servicio inyectable
-export class AuthorsService { // Declaración de la clase AuthorsService
-  constructor(@InjectRepository(Author) private repo: Repository<Author>) {} // Inyección del repositorio de autores
+//Servicio para manejar la logica de los autores
+@Injectable()
+export class AuthorsService {
 
-  findAll() { return this.repo.find(); } // Declaración del método para buscar todos los autores
+  //Inyecta el repositorio de autores
+  constructor(
+    @InjectRepository(Author)
+    private readonly authorRepo: Repository<Author>,
+  ) {}
 
-  async findOne(id: string) { // Declaración del método para buscar un autor por ID
-    const author = await this.repo.findOne({ where: { id } }); // Consulta para buscar autor por ID
-    if (!author) throw new NotFoundException('Author not found'); // Validación de que el autor existe
-    return author; // Retorno del autor encontrado
+  // Crea un nuevo autor
+  async create(createDto: CreateAuthorDto): Promise<Author> {
+    const ent = this.authorRepo.create(createDto);
+    return this.authorRepo.save(ent);
   }
 
-  async create(data: Partial<Author>) { // Declaración del método para crear autor
-    const author = this.repo.create(data); // Creación de instancia de autor
-    return this.repo.save(author); // Operación de guardar autor en la base de datos
+  // Obtiene todos los autores
+  findAll(): Promise<Author[]> {
+    return this.authorRepo.find({ relations: ['books'] });
   }
 
-  async update(id: string, data: Partial<Author>) { // Declaración del método para actualizar autor
-    await this.repo.update(id, data); // Operación de actualizar autor en la base de datos
-    return this.findOne(id); // Retorno del autor actualizado
+  // Obtiene un autor por su ID
+  async findOne(id: number): Promise<Author> {
+    const a = await this.authorRepo.findOne({ where: { id }, relations: ['books'] });
+    if (!a) throw new NotFoundException(`Author with id ${id} not found`);
+    return a;
   }
 
-  async remove(id: string) { // Declaración del método para eliminar autor
-    const res = await this.repo.delete(id); // Operación de eliminar autor de la base de datos
-    if (!res.affected) throw new NotFoundException('Author not found'); // Validación de que se eliminó el autor
-    return { deleted: true }; // Retorno de confirmación de eliminación
+  // Actualiza un autor existente
+  async update(id: number, dto: UpdateAuthorDto): Promise<Author> {
+    const author = await this.findOne(id);
+    Object.assign(author, dto);
+    return this.authorRepo.save(author);
+  }
+
+  // Elimina un autor por su ID
+  async remove(id: number): Promise<void> {
+    const res = await this.authorRepo.delete(id);
+    if (res.affected === 0) throw new NotFoundException(`Author with id ${id} not found`);
   }
 }

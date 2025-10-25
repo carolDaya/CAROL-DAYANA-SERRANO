@@ -1,75 +1,109 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Book } from './book.entity';
 import { Category } from '../categories/category.entity';
 import { Author } from '../authors/author.entity';
 import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
+// Creación del servicio para gestionar libros
 @Injectable()
 export class BooksService {
+  // Inyección de los repositorios necesarios
   constructor(
-    @InjectRepository(Book) 
-    private readonly booksRepo: Repository<Book>,
-    @InjectRepository(Category) 
-    private readonly catRepo: Repository<Category>,
-    @InjectRepository(Author) 
+    @InjectRepository(Book)
+    private readonly bookRepo: Repository<Book>,
+
+    @InjectRepository(Category)
+    private readonly categoryRepo: Repository<Category>,
+
+    @InjectRepository(Author)
     private readonly authorRepo: Repository<Author>,
   ) {}
 
+  // Método para crear un nuevo libro
   async create(dto: CreateBookDto): Promise<Book> {
-    const book = this.booksRepo.create({
+    const book = this.bookRepo.create({
       title: dto.title,
-      isbn: dto.isbn,
-      // Use 0 as default if copiesAvailable is undefined or null
-      copiesAvailable: dto.copiesAvailable ?? 0, 
-      description: dto.description,
+      isbn: dto.isbn ?? null,
+      description: dto.description ?? null,
+      publishedAt: dto.publishedAt ? new Date(dto.publishedAt) : null,
+      copies: dto.copies ?? 0,
+      copiesAvailable:
+        dto.copiesAvailable !== undefined ? dto.copiesAvailable : dto.copies ?? 0,
     });
 
-    // Handle Category Relationship
-    if (dto.categoryId) {
-      const category = await this.catRepo.findOne({ where: { id: dto.categoryId } });
+    // Asociar categoría si se proporciona
+    if (dto.categoryId !== undefined && dto.categoryId !== null) {
+      const category = await this.categoryRepo.findOne({ where: { id: dto.categoryId } });
       if (!category) throw new NotFoundException('Category not found');
       book.category = category;
     }
 
-    // Handle Authors Relationship (Many-to-Many)
-    if (dto.authorIds && dto.authorIds.length) {
-      // Use TypeORM 'In' operator to efficiently fetch all authors by ID array
-      const authors = await this.authorRepo.findBy({ id: In(dto.authorIds) });
-      if (!authors.length) throw new NotFoundException('Authors not found');
-      book.authors = authors;
+    // Asociar autor si se proporciona
+    if (dto.authorId !== undefined && dto.authorId !== null) {
+      const author = await this.authorRepo.findOne({ where: { id: dto.authorId } });
+      if (!author) throw new NotFoundException('Author not found');
+      book.author = author;
     }
 
-    return this.booksRepo.save(book);
+    return this.bookRepo.save(book);
   }
 
+  // Método para obtener todos los libros
   async findAll(): Promise<Book[]> {
-    // Load category and authors with the book for the list view
-    return this.booksRepo.find({ 
-      relations: ['category', 'authors'],
-    });
+    return this.bookRepo.find();
   }
 
-  async findOne(id: string): Promise<Book> {
-    const book = await this.booksRepo.findOne({ 
-      where: { id },
-      relations: ['category', 'authors'],
-    });
+  // Método para obtener un libro por su ID
+  async findOne(id: number): Promise<Book> {
+    const book = await this.bookRepo.findOne({ where: { id } });
     if (!book) throw new NotFoundException('Book not found');
     return book;
   }
 
-  async remove(id: string): Promise<void> {
-    const result = await this.booksRepo.delete(id);
-    if (result.affected === 0) throw new NotFoundException('Book not found');
+  // Método para actualizar un libro existente
+  async update(id: number, dto: UpdateBookDto): Promise<Book> {
+    const book = await this.findOne(id);
+
+    if (dto.title !== undefined) book.title = dto.title;
+    if (dto.isbn !== undefined) book.isbn = dto.isbn ?? null;
+    if (dto.description !== undefined) book.description = dto.description ?? null;
+    if (dto.publishedAt !== undefined)
+      book.publishedAt = dto.publishedAt ? new Date(dto.publishedAt) : null;
+    if (dto.copies !== undefined) book.copies = dto.copies;
+    if (dto.copiesAvailable !== undefined) book.copiesAvailable = dto.copiesAvailable;
+
+    // Manejo de la categoría
+    if (dto.categoryId !== undefined) {
+      if (dto.categoryId === null) {
+        book.category = null;
+      } else {
+        const category = await this.categoryRepo.findOne({ where: { id: dto.categoryId } });
+        if (!category) throw new NotFoundException('Category not found');
+        book.category = category;
+      }
+    }
+
+    // Manejo del autor
+    if (dto.authorId !== undefined) {
+      if (dto.authorId === null) {
+        book.author = null;
+      } else {
+        const author = await this.authorRepo.findOne({ where: { id: dto.authorId } });
+        if (!author) throw new NotFoundException('Author not found');
+        book.author = author;
+      }
+    }
+
+    return this.bookRepo.save(book);
   }
 
-  // Handles updating stock by a positive or negative 'delta'
-  async updateCopies(id: string, delta: number): Promise<Book> {
+  // Método para eliminar un libros
+  async remove(id: number): Promise<void> {
     const book = await this.findOne(id);
-    // Ensure copiesAvailable never drops below zero (Math.max)
-    book.copiesAvailable = Math.max((book.copiesAvailable ?? 0) + delta, 0); 
-    return this.booksRepo.save(book);
+    await this.bookRepo.remove(book);
   }
+
 }

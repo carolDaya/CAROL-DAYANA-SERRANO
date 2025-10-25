@@ -1,42 +1,64 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from 'typeorm';
 import { Category } from '../categories/category.entity';
 import { Author } from '../authors/author.entity';
 import { Loan } from '../loans/loan.entity';
 import { Review } from '../reviews/review.entity';
 
+ // Creación de la entidad Book
 @Entity('books')
 export class Book {
-  @PrimaryGeneratedColumn('uuid') 
-  id: string;
-  
-  @Column() 
-  title: string;
-  
-  @Column({ nullable: true }) 
-  isbn: string;
-  
-  @Column({ type: 'int', default: 1 }) 
-  copiesAvailable: number;
-  
-  @Column({ nullable: true }) 
-  description: string;
+  // Clave primaria auto-generada
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  // Relationship: Many books belong to one Category (FK)
-  // eager: true ensures Category loads automatically with the Book
-  @ManyToOne(() => Category, category => category.books, { eager: true }) 
-  category: Category;
-  
-  // Relationship: Many-to-Many with Authors
-  // @JoinTable defines the intermediate table 'book_authors'
-  @ManyToMany(() => Author, author => author.books, { eager: true })
-  @JoinTable({ name: 'book_authors' }) 
-  authors: Author[];
-  
-  // Relationship: One book can have many Loans (lazy)
-  @OneToMany(() => Loan, loan => loan.book) 
+  // Título del libro
+  @Column({ length: 255 })
+  title: string;
+
+  // ISBN del libro (opcional y único)
+  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  isbn: string | null;
+
+  // Descripción del libro (opcional) 
+  @Column({ type: 'text', nullable: true })
+  description?: string | null;
+
+  // Fecha de publicación del libro (opcional)
+  @Column({ type: 'date', name: 'published_at', nullable: true })
+  publishedAt?: Date | null;
+
+  // Número de copias totales y disponibles
+  @Column({ type: 'int', default: 0 })
+  copies: number;
+
+  // Número de copias disponibles
+  @Column({ type: 'int', name: 'copies_available', default: 0 })
+  copiesAvailable: number;
+
+  // Fecha de creación del registro
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  // Relaciones con Category y Author
+  @ManyToOne(() => Category, (category) => category.books, {
+    nullable: true,
+    onDelete: 'SET NULL',
+    eager: true,
+  })
+  category?: Category | null;
+
+  // Relaciones con Author
+  @ManyToOne(() => Author, (author) => author.books, {
+    nullable: true,
+    onDelete: 'SET NULL',
+    eager: true,
+  })
+  author?: Author | null;
+
+  // Relaciones inversas
+  @OneToMany(() => Loan, (loan) => loan.book)
   loans: Loan[];
-  
-  // Relationship: One book can have many Reviews (lazy)
-  @OneToMany(() => Review, review => review.book) 
+
+  @OneToMany(() => Review, (review) => review.book)
   reviews: Review[];
 }

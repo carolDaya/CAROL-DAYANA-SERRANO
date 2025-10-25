@@ -1,56 +1,45 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Param,
-  Patch,
-  Delete,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Assuming this path is correct
+import { UpdateBookDto } from './dto/update-book.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
+// Creación del controlador para la entidad "books"
 @Controller('books')
 export class BooksController {
-  constructor(private readonly svc: BooksService) {}
+  // Inyección del servicio de libros
+  constructor(private readonly booksService: BooksService) {}
 
-  // Retrieves all books
+  // Protección de la ruta con JWT para crear un libro
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  create(@Body() dto: CreateBookDto) {
+    return this.booksService.create(dto);
+  }
+
+  // Obtención de todos los libros
   @Get()
   findAll() {
-    return this.svc.findAll();
+    return this.booksService.findAll();
   }
 
-  // Retrieves a book by ID
+  // Obtención de un libro por su ID
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.svc.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.booksService.findOne(id);
   }
 
-  // Creates a new book (Authentication required)
-  @UseGuards(JwtAuthGuard) 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: CreateBookDto) {
-    return this.svc.create(dto);
+  // Protección de la ruta con JWT para actualizar un libro
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBookDto) {
+    return this.booksService.update(id, dto);
   }
 
-  // Updates the number of available copies (Authentication required)
-  // Delta represents the change (e.g., +5 for stock refill, -1 for a loan)
-  @UseGuards(JwtAuthGuard) 
-  @Patch(':id/copies/:delta')
-  updateCopies(@Param('id') id: string, @Param('delta') delta: string) {
-    return this.svc.updateCopies(id, Number(delta));
-  }
-
-  // Removes a book (Authentication required)
-  @UseGuards(JwtAuthGuard) 
+  // Protección de la ruta con JWT para eliminar un libro
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    return this.svc.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.booksService.remove(id);
   }
 }

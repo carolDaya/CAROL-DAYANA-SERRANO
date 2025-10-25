@@ -1,29 +1,38 @@
 @baseUrl = http://localhost:3000
-@categoryId = 59e0269d-65dd-4d13-9d62-acd599acfbdd
+@contentType = application/json
+@token = {{token}}
 
-### 1. CREAR CATEGORÍA
-POST {{baseUrl}}/categories
-Content-Type: application/json
-
-{
-  "name": "Novel fiction"
-}
-
-> {% client.global.set("categoryId", response.body.id) %}
-
-### 2. OBTENER TODAS LAS CATEGORÍAS
+### OBTENER TODAS LAS CATEGORIAS CON SUS LIBROS
 GET {{baseUrl}}/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
-### 3. OBTENER CATEGORÍA POR ID
-GET {{baseUrl}}/categories/{{categoryId}}
+### OBTENER UNA CATEGORIA CON ID CON SUS LIBROS
+GET {{baseUrl}}/categories/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
-### 4. ACTUALIZAR CATEGORÍA
-PATCH {{baseUrl}}/categories/{{categoryId}}
-Content-Type: application/json
+### CREAR UNA NUEVA CATEGORIA
+POST {{baseUrl}}/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 {
-  "name": "Novel Fiction (Actualizado)"
+  "name": "Acción y Aventura",
+  "description": "Categoría para libros de acción y aventura"
 }
 
-### 5. ELIMINAR CATEGORÍA
-DELETE {{baseUrl}}/categories/{{categoryId}}
+### ACTUALIZAR UNA CATEGORIA EXISTENTE
+PATCH {{baseUrl}}/categories/2
+Content-Type: {{contentType}} 
+Authorization: Bearer {{token}}
+
+{
+  "name": "Aventura Épica",
+  "description": "Categoría actualizada para libros de aventura épica"
+}
+
+### ELIMINAR UNA CATEGORIA
+DELETE {{baseUrl}}/categories/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}

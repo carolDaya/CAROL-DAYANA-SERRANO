@@ -1,7 +1,14 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, MaxLength } from 'class-validator';
 
+// Clase DTO para crear una categoría
 export class CreateCategoryDto {
-  @IsString()
-  @IsNotEmpty({ message: 'Category name cannot be empty' })
-  readonly name: string;
+  // Nombre de la categoría (obligatorio)
+  @IsString() 
+  @MaxLength(255) 
+  name: string; 
+
+  // Descripción opcional de la categoría
+  @IsOptional() 
+  @IsString() 
+  description?: string | null; 
 }

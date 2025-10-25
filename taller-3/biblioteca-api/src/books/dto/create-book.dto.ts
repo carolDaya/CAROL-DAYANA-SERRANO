@@ -1,31 +1,45 @@
-import { IsString, IsOptional, IsUUID, IsInt, Min, IsArray, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, IsDateString } from 'class-validator';
 
+// Creación del DTO para la entidad Book
 export class CreateBookDto {
-  @IsString() 
-  @IsNotEmpty()
-  title: string; 
+  // Título del libro (obligatorio)
+  @IsString()
+  title: string;
 
-  @IsOptional() 
-  @IsString() 
-  isbn?: string; 
+  // ISBN del libro (opcional)
+  @IsOptional()
+  @IsString()
+  isbn?: string | null;
 
-  @IsOptional() 
-  @IsInt() 
-  @Min(0) 
-  copiesAvailable?: number; 
+  // Descripción del libro (opcional)
+  @IsOptional()
+  @IsString()
+  description?: string | null;
 
-  @IsOptional() 
-  @IsString() 
-  description?: string; 
+  // Fecha de publicación del libro (opcional)
+  @IsOptional()
+  @IsDateString()
+  publishedAt?: string | null;
 
-  // Foreign key validation (Category must exist in the database)
-  @IsOptional() 
-  @IsUUID() 
-  categoryId?: string; 
+  // Número de copias del libro (opcional, mínimo 0)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  copies?: number;
 
-  // Array of UUIDs for many-to-many relationship
-  @IsOptional() 
-  @IsArray() 
-  @IsUUID(undefined, { each: true }) // Validates that each element in the array is a UUID
-  authorIds?: string[]; 
+  // Número de copias disponibles del libro (opcional, mínimo 0)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  copiesAvailable?: number;
+
+  // ID de la categoría del libro (opcional)  
+  @IsOptional()
+  @IsInt()
+  categoryId?: number;
+
+  // ID del autor del libro (opcional)
+  @IsOptional()
+  @IsInt()
+  authorId?: number;
 }
