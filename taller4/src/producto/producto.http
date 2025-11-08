@@ -1,0 +1,45 @@
+### 🔹 Obtener todos los productos
+GET http://localhost:3000/productos
+Content-Type: application/json
+
+###
+
+### 🔹 Obtener un producto por ID
+GET http://localhost:3000/productos/1
+Content-Type: application/json
+
+###
+
+### 🔹 Crear un producto
+POST http://localhost:3000/productos
+Content-Type: application/json
+
+{
+  "nombre": "tornillos",
+  "descripcion": "de 5 milimetros",
+  "precio": 1500,
+  "stock": 50,
+  "proveedorId": 1,
+  "categoriaId": 1
+}
+
+###
+
+### 🔹 Actualizar un producto
+PUT http://localhost:3000/productos/1
+Content-Type: application/json
+
+{
+  "nombre": "tubo de pvc",
+  "descripcion": "plastico",
+  "precio": 27000,
+  "stock": 40,
+  "proveedorId": 1,
+  "categoriaId": 1
+}
+
+###
+
+### 🔹 Eliminar un producto
+DELETE http://localhost:3000/productos/1
+Content-Type: application/json

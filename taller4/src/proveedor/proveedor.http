@@ -1,0 +1,28 @@
+### Obtener todos los proveedores
+GET http://localhost:3000/proveedores
+
+### Obtener un proveedor por ID
+GET http://localhost:3000/proveedores/1
+
+### Crear un proveedor
+POST http://localhost:3000/proveedores
+Content-Type: application/json
+
+{
+  "nombre": "NestJS Distribuciones",
+  "telefono": "3201234567",
+  "correo": "contacto@nestjs.com"
+}
+
+### Actualizar un proveedor
+PUT http://localhost:3000/proveedores/1
+Content-Type: application/json
+
+{
+  "nombre": "Distribuciones Actualizadas",
+  "telefono": "3109876543",
+  "correo": "nuevo@correo.com"
+}
+
+### Eliminar un proveedor
+DELETE http://localhost:3000/proveedores/1

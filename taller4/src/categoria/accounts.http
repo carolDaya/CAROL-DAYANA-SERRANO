@@ -1,0 +1,34 @@
+
+// Crear nueva categoría
+
+POST http://localhost:3000/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Materiales de construcción",
+  "descripcion": "Cemento, arena, yeso y otros materiales básicos"
+}
+
+// Listar todas las categorías
+
+GET http://localhost:3000/categorias
+
+// Buscar categoría por ID
+
+GET http://localhost:3000/categorias/1
+
+// Actualizar una categoría
+
+PATCH http://localhost:3000/categorias/1
+Content-Type: application/json
+
+{
+  "nombre": "Cementos tradicionales",
+  "descripcion": "Cemento gris y blanco para usos generales"
+}
+
+// Elimina una categoría
+DELETE http://localhost:3000/categorias/1
+
+
+

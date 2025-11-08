@@ -1,0 +1,15 @@
+### ➕ Agregar producto a una venta
+POST http://localhost:3000/venta-producto
+Content-Type: application/json
+
+{
+  "idVenta": 1,
+  "idProducto": 2,
+  "cantidad": 3
+}
+
+### 📋 Listar productos de una venta
+GET http://localhost:3000/venta-producto/1
+
+### ❌ Eliminar un producto de una venta
+DELETE http://localhost:3000/venta-producto/5

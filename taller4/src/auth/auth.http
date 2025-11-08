@@ -1,0 +1,19 @@
+### Registro de usuario
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "nombre": "Eidder",
+  "correo": "eidder@mail.com",
+  "contrasena": "12345678",
+  "rol": "empleado"
+}
+
+### Login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "correo": "eidder@mail.com",
+  "contrasena": "12345678"
+}

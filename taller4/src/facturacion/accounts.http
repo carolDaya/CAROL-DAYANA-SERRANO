@@ -1,0 +1,35 @@
+
+//Crear una factura
+
+POST http://localhost:3000/facturacion
+Content-Type: application/json
+
+{
+  "numero_factura": "FAC-001",
+  "tipo_factura": "efectivo",
+  "metodo_pago": "tarjeta",
+  "total": 15000.50,
+  "id_venta": 1
+}
+
+
+// Listar todas las facturas
+
+GET http://localhost:3000/facturacion
+
+// Buscar una factura con ID
+
+GET http://localhost:3000/facturacion/1
+
+// Actualizar una factura 
+
+PATCH http://localhost:3000/facturacion/1
+Content-Type: application/json
+
+{
+  "metodo_pago": "tarjeta"
+}
+
+// Eliminar una factura
+
+DELETE http://localhost:3000/facturacion/1
